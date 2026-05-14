@@ -1,0 +1,468 @@
+{
+  "agent_id": "54360516-c3a6-4eb7-a01d-9db9371fffe2",
+  "name": "Executive Assistant",
+  "mode": "skills",
+  "deploy_status": "draft",
+  "chat_model": "gemini/gemini-2.5-flash",
+  "system_prompt": "",
+  "scratchpad": "",
+  "soul": {
+    "persona": "You are a seasoned executive assistant with 15 years of experience supporting\nC-suite executives. You are organized, discreet, proactive, and have excellent\njudgment about what deserves the executive's attention and what you should handle\nquietly on your own.\n\nYou think in terms of protecting the executive's time and attention. Every\nnotification, every meeting request, every email \u2014 you ask \"does this need\ntheir attention right now, or can I handle it?\" You default to handling it\nyourself and only escalate when something is genuinely urgent or requires\ntheir personal decision.\n\nYou write concise, professional messages. You never waste words. When you\nbrief the executive, you lead with the decision needed, not the background.\nBackground goes below the fold.\n\nYou know that context-switching is expensive. You batch non-urgent updates\ninto scheduled briefings rather than interrupting throughout the day.\n",
+    "brand": {},
+    "behavior_rules": [
+      "Protect the executive's focus. Batch non-urgent updates into morning and afternoon briefs. Only send immediate Slack messages for genuinely urgent items.",
+      "Urgent means: revenue impact, customer escalation, executive-level requests, time-sensitive decisions (deadline within 4 hours), or system outages. Everything else waits for the next scheduled brief.",
+      "Never notify about the same item twice unless there's a material update. Track what you've already reported using memory.",
+      "When booking meetings, always check calendar conflicts first. Default to 30-minute slots. Leave 15-minute buffers between back-to-back meetings. Prefer mornings for strategic meetings, afternoons for operational ones.",
+      "For email triage: immediately flag emails from investors, board members, key customers, and direct reports. Summarize everything else in the daily brief.",
+      "Draft email replies when you can. Present them for approval rather than asking the executive to write from scratch.",
+      "Keep a running action item list in Google Sheets. Update it from meetings, emails, and conversations. Mark items complete when done.",
+      "For LinkedIn and X: draft posts for approval, never post without confirmation unless given explicit standing permission. Monitor mentions and DMs and surface anything that needs a response.",
+      "When summarizing emails or threads, lead with: who, what they want, and what decision is needed. Skip pleasantries and filler.",
+      "If you're unsure whether something is urgent, err on the side of notifying. A false positive is better than a missed urgent item.",
+      "Never share calendar details, email contents, or internal information with anyone other than the executive unless explicitly instructed.",
+      "Track meeting prep needs. 30 minutes before important meetings, send a Slack reminder with context: who's attending, what's on the agenda, any prep materials from Drive."
+    ],
+    "welcome_message": "I'm your Executive Assistant. I'll manage your inbox, calendar,\nand communications so you can focus on what matters.\n\nHere's how I work:\n- I check your email throughout the day and only ping you about urgent items\n- I send you a morning brief and afternoon recap on Slack\n- I can book, reschedule, or cancel meetings on your behalf\n- I track action items in a Google Sheet\n- I draft LinkedIn and X posts for your approval\n\nTo get started, tell me about your typical day, who your key contacts are,\nand what counts as \"urgent\" in your world.\n"
+  },
+  "skills": [
+    {
+      "skill_id": "current-time",
+      "name": "Time & Date Utilities",
+      "description": "Get current time, convert timezones, calculate date differences, and more",
+      "skill_type": "tool",
+      "category": "general",
+      "catalog_type": "core",
+      "config": {}
+    },
+    {
+      "skill_id": "fetch-url",
+      "name": "Fetch URL",
+      "description": "Fetch and extract content from a web URL \u2014 articles, documentation, links, or API responses",
+      "skill_type": "tool",
+      "category": "general",
+      "catalog_type": "core",
+      "config": {}
+    },
+    {
+      "skill_id": "gmail",
+      "name": "Gmail",
+      "description": "Comprehensive Gmail \u2014 read, search, send, reply, draft, label, and manage emails",
+      "skill_type": "sandbox",
+      "category": "communication",
+      "catalog_type": "platform",
+      "config": {},
+      "config_schema": {
+        "properties": {
+          "send_rules": {
+            "type": "text",
+            "group": "rules",
+            "label": "Send Rules",
+            "description": "Rules for when and how the LLM should send emails",
+            "placeholder": "- Always confirm with user before sending\n- Include a clear subject line\n- Keep emails professional and concise"
+          },
+          "label_rules": {
+            "type": "text",
+            "group": "rules",
+            "label": "Label Rules",
+            "description": "Rules for auto-labeling emails",
+            "placeholder": "- Label invoices as 'Finance/Invoices'\n- Label support emails as 'Support'\n- Apply 'Action Required' to urgent items"
+          },
+          "max_results": {
+            "type": "number",
+            "group": "defaults",
+            "label": "Default Max Results",
+            "default": 10,
+            "description": "Default number of emails to return in list/search"
+          },
+          "reply_rules": {
+            "type": "text",
+            "group": "rules",
+            "label": "Reply Rules",
+            "description": "Rules for replying to emails",
+            "placeholder": "- Quote relevant parts of the original message\n- Address all points raised in the original\n- Use Reply-All only when explicitly requested"
+          },
+          "safety_rules": {
+            "type": "text",
+            "group": "rules",
+            "label": "Safety Rules",
+            "description": "Safety constraints for email operations",
+            "placeholder": "- Never send to more than 10 recipients at once\n- Always confirm before trashing emails\n- Never auto-reply to external senders"
+          },
+          "default_from_name": {
+            "type": "string",
+            "group": "defaults",
+            "label": "Default Sender Name",
+            "description": "Display name for outgoing emails",
+            "placeholder": "AI Assistant"
+          },
+          "default_signature": {
+            "type": "text",
+            "group": "defaults",
+            "label": "Email Signature",
+            "description": "Signature appended to outgoing emails",
+            "placeholder": "---\nSent by AI Assistant"
+          }
+        }
+      },
+      "resource_requirements": [
+        {
+          "name": "Gmail Credentials JSON",
+          "env_var": "GMAIL_CREDENTIALS_JSON",
+          "description": "OAuth2 credentials JSON (auto-provided by gateway connection)"
+        },
+        {
+          "name": "Gmail User Email",
+          "env_var": "GMAIL_USER_EMAIL",
+          "description": "Email address of the connected Gmail account"
+        }
+      ]
+    },
+    {
+      "skill_id": "gmail-read",
+      "name": "Gmail Read",
+      "description": "Read recent emails from Gmail inbox",
+      "skill_type": "sandbox",
+      "category": "communication",
+      "catalog_type": "platform",
+      "config": {},
+      "resource_requirements": [
+        {
+          "name": "Gmail Service Account JSON",
+          "env_var": "GMAIL_CREDENTIALS_JSON",
+          "description": "Google service account credentials JSON"
+        },
+        {
+          "name": "Gmail User Email",
+          "env_var": "GMAIL_USER_EMAIL",
+          "description": "Email address to read from"
+        }
+      ]
+    },
+    {
+      "skill_id": "gmail-search",
+      "name": "Gmail Search",
+      "description": "Search emails in Gmail with a query",
+      "skill_type": "sandbox",
+      "category": "communication",
+      "catalog_type": "platform",
+      "config": {},
+      "resource_requirements": [
+        {
+          "name": "Gmail Service Account JSON",
+          "env_var": "GMAIL_CREDENTIALS_JSON",
+          "description": "Google service account credentials JSON"
+        },
+        {
+          "name": "Gmail User Email",
+          "env_var": "GMAIL_USER_EMAIL",
+          "description": "Email address to search"
+        }
+      ]
+    },
+    {
+      "skill_id": "gmail-send",
+      "name": "Gmail Send",
+      "description": "Send an email via Gmail API",
+      "skill_type": "sandbox",
+      "category": "communication",
+      "catalog_type": "platform",
+      "config": {},
+      "resource_requirements": [
+        {
+          "name": "Gmail Service Account JSON",
+          "env_var": "GMAIL_CREDENTIALS_JSON",
+          "description": "Google service account credentials JSON"
+        },
+        {
+          "name": "Gmail User Email",
+          "env_var": "GMAIL_USER_EMAIL",
+          "description": "Email address to send from (delegated)"
+        }
+      ]
+    },
+    {
+      "skill_id": "google-calendar",
+      "name": "Google Calendar",
+      "description": "Comprehensive Google Calendar \u2014 list, create, update, reschedule, delete events, manage guests, add Google Meet, check availability, and more",
+      "skill_type": "sandbox",
+      "category": "productivity",
+      "catalog_type": "platform",
+      "config": {},
+      "config_schema": {
+        "properties": {
+          "timezone": {
+            "type": "string",
+            "group": "defaults",
+            "label": "Timezone",
+            "description": "Default timezone for events",
+            "placeholder": "America/New_York"
+          },
+          "event_rules": {
+            "type": "text",
+            "group": "rules",
+            "label": "Event Rules",
+            "description": "Rules for creating and managing events",
+            "placeholder": "- Always add Google Meet to meetings with guests\n- Default to 30 min for 1:1s\n- Include agenda in description"
+          },
+          "invite_rules": {
+            "type": "text",
+            "group": "rules",
+            "label": "Invite Rules",
+            "description": "Rules for adding attendees and sending invitations",
+            "placeholder": "- Confirm with user before inviting external guests\n- Always set RSVP to needsAction for new guests"
+          },
+          "default_calendar": {
+            "type": "string",
+            "group": "defaults",
+            "label": "Default Calendar ID",
+            "default": "primary",
+            "description": "Calendar ID to use when not specified",
+            "placeholder": "primary"
+          },
+          "default_duration": {
+            "type": "select",
+            "group": "defaults",
+            "label": "Default Duration",
+            "default": "30 min",
+            "options": [
+              "15 min",
+              "30 min",
+              "45 min",
+              "1 hour",
+              "1.5 hours",
+              "2 hours"
+            ],
+            "description": "Default meeting duration when not specified"
+          }
+        }
+      },
+      "resource_requirements": [
+        {
+          "name": "Google Calendar Credentials JSON",
+          "env_var": "GOOGLE_SERVICE_ACCOUNT_JSON",
+          "description": "OAuth2 credentials JSON (auto-provided by gateway connection)"
+        },
+        {
+          "name": "Calendar ID",
+          "env_var": "CALENDAR_ID",
+          "description": "Google Calendar ID (default: primary)"
+        }
+      ]
+    },
+    {
+      "skill_id": "google-drive",
+      "name": "Google Drive",
+      "description": "Manage Google Drive \u2014 list, search, create, upload, share, and organize files, folders, docs, and sheets",
+      "skill_type": "sandbox",
+      "category": "productivity",
+      "catalog_type": "platform",
+      "config": {},
+      "config_schema": {
+        "properties": {
+          "file_rules": {
+            "type": "text",
+            "group": "rules",
+            "label": "File Organization Rules",
+            "description": "Rules for how the LLM should organize files and folders",
+            "placeholder": "- Create project folders with date prefix (YYYY-MM-DD)\n- Always share with the team group email\n- Use descriptive file names"
+          },
+          "naming_rules": {
+            "type": "text",
+            "group": "rules",
+            "label": "Naming Conventions",
+            "description": "Rules for file and folder naming",
+            "placeholder": "- Use kebab-case for file names\n- Prefix project docs with project code\n- Include version numbers for iterations"
+          },
+          "sharing_rules": {
+            "type": "text",
+            "group": "rules",
+            "label": "Sharing Rules",
+            "description": "Rules for file sharing permissions",
+            "placeholder": "- Default to viewer access\n- Only give editor access when explicitly requested\n- Always notify when sharing"
+          },
+          "default_folder_id": {
+            "type": "string",
+            "group": "defaults",
+            "label": "Default Folder ID",
+            "default": "root",
+            "description": "Default folder ID for file operations (use 'root' for My Drive root)",
+            "placeholder": "root"
+          },
+          "default_share_role": {
+            "type": "select",
+            "group": "defaults",
+            "label": "Default Share Role",
+            "default": "reader",
+            "options": [
+              "reader",
+              "commenter",
+              "writer"
+            ],
+            "description": "Default permission role when sharing files"
+          }
+        }
+      },
+      "resource_requirements": [
+        {
+          "name": "Google Drive Credentials JSON",
+          "env_var": "GOOGLE_DRIVE_CREDENTIALS_JSON",
+          "description": "OAuth2 credentials JSON (auto-provided by gateway connection)"
+        },
+        {
+          "name": "Google Drive User Email",
+          "env_var": "GOOGLE_DRIVE_USER_EMAIL",
+          "description": "Email address of the connected Google account"
+        }
+      ]
+    },
+    {
+      "skill_id": "google-sheets",
+      "name": "Google Sheets",
+      "description": "Read, write, and manage Google Sheets spreadsheets",
+      "skill_type": "sandbox",
+      "category": "productivity",
+      "catalog_type": "platform",
+      "config": {},
+      "resource_requirements": [
+        {
+          "name": "Google Sheets Credentials",
+          "env_var": "GOOGLE_SHEETS_CREDENTIALS_JSON",
+          "description": "Google OAuth credentials JSON (auto-provided by gateway connection)"
+        },
+        {
+          "name": "Google Account Email",
+          "env_var": "GOOGLE_SHEETS_USER_EMAIL",
+          "description": "Email of the connected Google account"
+        }
+      ]
+    },
+    {
+      "skill_id": "linkedin",
+      "name": "LinkedIn",
+      "description": "Create posts, comment, react, read feed, and send connection requests on LinkedIn via the browser extension.",
+      "skill_type": "browser",
+      "category": "social",
+      "catalog_type": "platform",
+      "config": {}
+    },
+    {
+      "skill_id": "memory",
+      "name": "Agent Memory",
+      "description": "Remember and recall facts about users and context across conversations, and manage your persistent scratchpad/brain",
+      "skill_type": "tool",
+      "category": "general",
+      "catalog_type": "core",
+      "config": {}
+    },
+    {
+      "skill_id": "rest-api",
+      "name": "REST API Call",
+      "description": "Make HTTP requests to external APIs \u2014 GET, POST, PUT, PATCH, DELETE",
+      "skill_type": "tool",
+      "category": "general",
+      "catalog_type": "core",
+      "config": {}
+    },
+    {
+      "skill_id": "search-kb",
+      "name": "Knowledge Base",
+      "description": "Search the agent's uploaded documents and knowledge base",
+      "skill_type": "tool",
+      "category": "general",
+      "catalog_type": "core",
+      "config": {}
+    },
+    {
+      "skill_id": "slack-read-messages",
+      "name": "Slack Read Messages",
+      "description": "Read messages from a Slack thread",
+      "skill_type": "sandbox",
+      "category": "communication",
+      "catalog_type": "platform",
+      "config": {},
+      "resource_requirements": [
+        {
+          "name": "Slack Bot Token",
+          "env_var": "SLACK_BOT_TOKEN",
+          "description": "Slack Bot OAuth token (xoxb-...)"
+        }
+      ]
+    },
+    {
+      "skill_id": "slack-send-message",
+      "name": "Slack Send Message",
+      "description": "Send a message to a Slack thread",
+      "skill_type": "sandbox",
+      "category": "communication",
+      "catalog_type": "platform",
+      "config": {},
+      "resource_requirements": [
+        {
+          "name": "Slack Bot Token",
+          "env_var": "SLACK_BOT_TOKEN",
+          "description": "Slack Bot OAuth token (xoxb-...)"
+        }
+      ]
+    },
+    {
+      "skill_id": "text-to-speech",
+      "name": "Text to Speech",
+      "description": "Convert text to speech audio file using gTTS (free, no API key needed)",
+      "skill_type": "sandbox",
+      "category": "voice",
+      "catalog_type": "core",
+      "config": {}
+    },
+    {
+      "skill_id": "web-search",
+      "name": "Web Search",
+      "description": "Search the web for current information, news, and answers",
+      "skill_type": "tool",
+      "category": "general",
+      "catalog_type": "core",
+      "config": {}
+    },
+    {
+      "skill_id": "x",
+      "name": "X (Twitter)",
+      "description": "Create tweets, reply, retweet, like, search, and manage your X (Twitter) account",
+      "skill_type": "sandbox",
+      "category": "social",
+      "catalog_type": "platform",
+      "config": {},
+      "config_schema": {
+        "properties": {
+          "safety_rules": {
+            "type": "text",
+            "group": "rules",
+            "label": "Safety Rules",
+            "description": "Safety rules and constraints",
+            "placeholder": "- Always confirm with the user before tweeting\n- Never share confidential information"
+          },
+          "posting_rules": {
+            "type": "text",
+            "group": "rules",
+            "label": "Posting Rules",
+            "description": "Rules for how the LLM should create tweets",
+            "placeholder": "- Keep tweets concise\n- Use relevant hashtags\n- Never post controversial content"
+          }
+        }
+      },
+      "resource_requirements": [
+        {
+          "name": "X Access Token",
+          "env_var": "X_ACCESS_TOKEN",
+          "description": "OAuth 2.0 access token (auto-provided by gateway connection)"
+        }
+      ]
+    }
+  ],
+  "gateways": [],
+  "routines": [],
+  "triggers": [],
+  "mcp_connections": [],
+  "memories": [],
+  "knowledge_base": [],
+  "tools_config": {}
+}
